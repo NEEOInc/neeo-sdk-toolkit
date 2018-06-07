@@ -1,5 +1,5 @@
 {
-  "name": "cli",
+  "name": "@neeo/cli",
   "version": "0.0.0",
   "description": "NEEO SDK CLI",
   "public": true,
