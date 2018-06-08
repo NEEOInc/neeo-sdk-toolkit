@@ -16,7 +16,7 @@ npm install --save https://github.com/nklerk/neeo_driver-kodi @neeo/cli
 
 To start the server with the driver:
 ```
-nxp neeo-cli start
+npx neeo-cli start
 ```
 
 ## Installing the CLI Globally:
