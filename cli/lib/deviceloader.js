@@ -3,53 +3,29 @@
 const debug = require('debug')('neeo:cli:DeviceLoader');
 const fs = require('fs');
 const path = require('path');
-const config = require('./config');
+
+const LEGACY_EXPORT_PATH = 'devices';
 
 module.exports = {
   loadDevices,
 };
 
 function loadDevices() {
-  let localDevices = [];
-  try {
-    localDevices = getLocalDevices();
-  } catch (err) {
-    debug('SKIPPED_LOCAL_DRIVERS', err.message);
-    // We ignore missing local devices
-    if (err && !err.message.includes('ENOENT')) {
-      throw err;
-    }
-  }
-  const externalDevices = getExternalDevices();
-  const devices = [...localDevices, ...externalDevices];
-
-  return devices;
-}
-
-function getLocalDevices() {
-  const localDriverPath = getPathFromCwdTo(config.devicesDirectory);
+  const npmDriversPath = getPathFromCwdTo('node_modules');
 
   return loadDevicesFrom({
-    rootPath: localDriverPath,
-    directory: '',
-    filter: (file) => isExcludedFromDeviceSearch(file),
-  });
-}
-
-function getExternalDevices() {
-  const externalDriversPath = getPathFromCwdTo('node_modules');
-
-  return loadDevicesFrom({
-    rootPath: externalDriversPath,
-    directory: 'devices',
-    filter: (file) => isNeeoDriver(externalDriversPath, file),
+    rootPath: npmDriversPath,
+    filter: (file) => isNeeoDriver(npmDriversPath, file),
   });
 }
 
 function isNeeoDriver(driverPath, file) {
   const isNeeoPrefixed = (filename) =>
   filename.startsWith('neeo-') || filename.startsWith('neeo_');
-  const devicesIndexPath = path.join(driverPath, file, 'devices', 'index.js');
+
+  // TODO replace check for devices/index.js with the new package.json main option
+  // keep the devices/index as a fallback with legacy warning.
+  const devicesIndexPath = path.join(driverPath, file, LEGACY_EXPORT_PATH, 'index.js');
 
   return isNeeoPrefixed(file) && fs.existsSync(devicesIndexPath);
 }
@@ -58,14 +34,15 @@ function getPathFromCwdTo(directory) {
   return path.join(process.cwd(), directory);
 }
 
-function loadDevicesFrom({ rootPath, directory, filter }) {
+function loadDevicesFrom({ rootPath, filter }) {
   return fs
     .readdirSync(rootPath)
     .filter(filter)
     .map((file) => {
       try {
         debug('try to load driver from', rootPath, file);
-        const devicesPath = path.join(rootPath, file, directory);
+        console.warn(`Warning: loading driver from legacy devices/index.js for ${file}.`);
+        const devicesPath = path.join(rootPath, file, LEGACY_EXPORT_PATH, 'index.js');
         return require(devicesPath).devices;
       } catch (error) {
         console.error(
@@ -75,8 +52,4 @@ function loadDevicesFrom({ rootPath, directory, filter }) {
     })
     .reduce((acc, val) => acc.concat(val), [])
     .filter((device) => device);
-}
-
-function isExcludedFromDeviceSearch(file) {
-  return config.devicesExcludedDirectories.indexOf(file) === -1;
 }
