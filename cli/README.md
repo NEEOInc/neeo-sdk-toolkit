@@ -52,7 +52,9 @@ In the package json there is the `neeoSdkOptions` property:
   }
 ```
 
-Environement variable options (these will take precedence over the `neeoSdkOptions` above:
-
+Environement variable options (these will take precedence over the `neeoSdkOptions` above):
+* `NEEO_SERVER_NAME` – Sets the server name, overrides `neeoSdkOptions.serverName`
+* `NEEO_SERVER_PORT` – Sets the port the server will run on, overrides `neeoSdkOptions.serverPort`
+* `NEEO_HOST_IP` – Sets IP of the NEEO Brain to connect to, overrides `neeoSdkOptions.brainHost`
 * `NEEO_DEVICES_DIRECTORY` - deprecated
 * `NEEO_DEVICES_EXCLUDED_DIRECTORIES` - deprecated

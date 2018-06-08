@@ -1,0 +1,8 @@
+{
+  "neeoSdkOptions": {
+    "serverName": "unit-test-package-json",
+    "serverPort": 8888,
+    "brainHost": "10.0.0.42",
+    "brainPort": 8888
+  }
+}

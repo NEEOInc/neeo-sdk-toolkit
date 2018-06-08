@@ -17,7 +17,7 @@ function stopDevices() {
   }
   sdk.stopServer(serverConfiguration)
     .catch((error) => {
-      console.error('ERROR!', error.message);
+      console.error('ERROR:', error.message);
       process.exit(1);
     });
 }
@@ -32,7 +32,6 @@ function startDevices(sdkOptions) {
       console.info('- Start server, connect to NEEO Brain:', {
         brain: brain.name || 'unknown',
         host: brain.host,
-        port: brain.port,
       });
       storeSdkServerConfiguration(brain, sdkOptions, devices);
       return sdk.startServer(serverConfiguration);
@@ -41,7 +40,7 @@ function startDevices(sdkOptions) {
       console.info('# Your devices are now ready to use in the NEEO app!');
     })
     .catch((error) => {
-      console.error('ERROR!', error);
+      console.error('ERROR:', error.message);
       process.exit(1);
     });
 }
@@ -51,7 +50,7 @@ function storeSdkServerConfiguration(brain, sdkOptions, devices) {
   serverConfiguration = {
     brain,
     port: serverPort || 6336,
-    name: serverName || 'NEEO-SDK-server',
+    name: serverName || 'default',
     devices,
   };
 }

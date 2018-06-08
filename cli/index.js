@@ -1,16 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 
-const debug = require('debug')('neeo:cli:index');
-
-let packageFile = {};
-try {
-  packageFile = require(process.cwd() + '/package.json');
-} catch(error) {
-  debug('USING_DEFAULT_CONFIG', error.message);
-}
-
-const sdkOptions = packageFile.neeoSdkOptions || {};
+const commands = require('./lib/commands');
 const deviceController = require('./lib/devicecontroller');
 
 const argv = require('yargs')
@@ -22,17 +13,4 @@ const argv = require('yargs')
 process.on('SIGINT', () => process.exit());
 process.on('exit', () => deviceController.stopDevices());
 
-execute(argv._);
-
-function execute(options) {
-  const command = options[0];
-
-  switch (command) {
-    case 'start':
-      deviceController.startDevices(sdkOptions);
-      return;
-  }
-
-  console.warn('Unknown command:', command);
-  process.exit();
-}
+commands.execute(argv._);

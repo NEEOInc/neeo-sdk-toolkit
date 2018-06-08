@@ -10,7 +10,7 @@ const deviceLoader = require('../../../lib/deviceloader');
 const { startDevices, stopDevices } = require('../../../lib/devicecontroller');
 
 describe('./lib/devicecontroller.js', function() {
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
 
   beforeEach(function() {
     sandbox.stub(sdk, 'discoverOneBrain').resolves();
