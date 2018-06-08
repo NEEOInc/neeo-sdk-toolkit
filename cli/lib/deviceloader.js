@@ -1,6 +1,7 @@
 'use strict';
 
 const debug = require('debug')('neeo:cli:DeviceLoader');
+const BluePromise = require('bluebird');
 const fs = require('fs');
 const path = require('path');
 
@@ -13,10 +14,12 @@ module.exports = {
 function loadDevices() {
   const npmDriversPath = getPathFromCwdTo('node_modules');
 
-  return loadDevicesFrom({
+   const devices = loadDevicesFrom({
     rootPath: npmDriversPath,
     filter: (file) => isNeeoDriver(npmDriversPath, file),
   });
+
+  return BluePromise.resolve(devices);
 }
 
 function isNeeoDriver(driverPath, file) {

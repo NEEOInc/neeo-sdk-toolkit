@@ -65,34 +65,37 @@ describe('./lib/deviceloader.js', function() {
           fs.existsSync.withArgs(getLegacyIndexPath(mockDriver)).returns(true);
 
           mockery.registerMock(getLegacyIndexPath(mockDriver), {
-            devices: [{ name: mockDriver }],
+            devices: [getMockDriver(mockDriver)],
           });
         });
-
       });
 
       it('should load legacy drivers', function() {
-        const devices = deviceLoader.loadDevices();
-
-        expect(devices).to.deep.equal([
-          { name: 'neeo-driver-legacy-a'},
-          { name: 'neeo_driver-legacy-b'},
-        ]);
+        return deviceLoader.loadDevices()
+          .then((devices) => {  
+            expect(devices).to.deep.equal([
+              getMockDriver('neeo-driver-legacy-a'),
+              getMockDriver('neeo_driver-legacy-b'),
+            ]);
+          });
       });
 
       it('should warn when loading drivers the legacy way', function() {
         sandbox.stub(console, 'warn');
-        deviceLoader.loadDevices();
 
-        expect(console.warn).to.have.been.calledTwice;
+        return deviceLoader.loadDevices()
+        .then(() => {
+          expect(console.warn).to.have.been.calledTwice;
+        });
       });
     });
 
     context('when no devices are available', function() {
       it('should return an empty list', function() {
-        const devices = deviceLoader.loadDevices();
-
-        expect(devices).to.deep.equal([]);
+        return deviceLoader.loadDevices()
+        .then((devices) => {
+          expect(devices).to.deep.equal([]);
+        });
       });
     });
 
@@ -111,13 +114,18 @@ describe('./lib/deviceloader.js', function() {
       it('should return an empty list', function() {
         fs.readdirSync.returns(NON_DRIVER_MODULE_NAMES);
 
-        const devices = deviceLoader.loadDevices();
-
-        expect(devices).to.deep.equal([]);
+        return deviceLoader.loadDevices()
+          .then((devices) => {
+            expect(devices).to.deep.equal([]);
+          });
       });
     });
   });
 });
+
+function getMockDriver(name) {
+  return { name };
+}
 
 function getLegacyIndexPath(moduleName) {
   return `node_modules/${moduleName}/devices/index.js`;

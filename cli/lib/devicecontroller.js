@@ -56,20 +56,18 @@ function storeSdkServerConfiguration(brain, sdkOptions, devices) {
 }
 
 function loadDevices() {
-  return new BluePromise((resolve, reject) => {
-    const devices = deviceLoader.loadDevices();
+  return deviceLoader.loadDevices()
+    .then((devices) => {
+      const noDevicesDefined = devices.length === 0;
 
-    const noDevicesDefined = devices.length === 0;
-
-    if (noDevicesDefined) {
-      return reject(new Error(
-        'No devices found! Make sure you expose devices in the "devices" directory ' +
-        'or install external drivers through npm.'
-      ));
-    }
-
-    resolve(devices);
-  });
+      if (noDevicesDefined) {
+        throw new Error(
+          'No devices found! Make sure you expose devices in the "devices" directory ' +
+          'or install external drivers through npm.'
+        );
+      }
+      return devices;
+    });
 }
 
 function getBrain(sdkOptions) {

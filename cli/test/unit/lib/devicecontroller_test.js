@@ -16,6 +16,7 @@ describe('./lib/devicecontroller.js', function() {
     sandbox.stub(sdk, 'discoverOneBrain').resolves();
     sandbox.stub(sdk, 'stopServer').resolves();
     sandbox.stub(sdk, 'startServer').resolves();
+    sandbox.stub(deviceLoader, 'loadDevices').resolves([]);
   }); 
 
   afterEach(function() {
@@ -33,9 +34,7 @@ describe('./lib/devicecontroller.js', function() {
 
     context('when the server configuration has been stored', function() {
       it('should stop the server', function() {
-        sandbox
-          .stub(deviceLoader, 'loadDevices')
-          .returns([buildSampleDevice()]);
+        deviceLoader.loadDevices.resolves([buildSampleDevice()]);
 
         return startDevices({ brainHost: '10.0.0.1' }).then(() => {
           stopDevices();
@@ -51,7 +50,7 @@ describe('./lib/devicecontroller.js', function() {
         const sdkOptions = {
           brainHost: '10.0.0.1',
         };
-        sandbox.stub(deviceLoader, 'loadDevices').returns([]);
+        deviceLoader.loadDevices.resolves([]);
         sandbox.stub(process, 'exit').returns();
 
         return startDevices(sdkOptions)
@@ -68,7 +67,7 @@ describe('./lib/devicecontroller.js', function() {
         };
 
         const device = buildSampleDevice();
-        sandbox.stub(deviceLoader, 'loadDevices').returns([device]);
+        deviceLoader.loadDevices.resolves([device]);
 
         return startDevices(sdkOptions).then(() => {
           expect(sdk.startServer).to.have.been.calledWith({
@@ -82,23 +81,24 @@ describe('./lib/devicecontroller.js', function() {
           });
         });
       });
-      context('when brain host is not configured', function() {
-        it('should start the server against the first discovered brain', function() {
-          sdk.discoverOneBrain.resolves({ host: '10.0.0.2', port: 3001 });
+    });
 
-          const device = buildSampleDevice();
-          sandbox.stub(deviceLoader, 'loadDevices').returns([device]);
+    context('when brain host is not configured', function() {
+      it('should start the server against the first discovered brain', function() {
+        sdk.discoverOneBrain.resolves({ host: '10.0.0.2', port: 3001 });
 
-          return startDevices({}).then(() => {
-            expect(sdk.startServer).to.have.been.calledWith({
-              brain: {
-                host: '10.0.0.2',
-                port: 3001,
-              },
-              port: 6336,
-              name: 'default',
-              devices: [device],
-            });
+        const device = buildSampleDevice();
+        deviceLoader.loadDevices.resolves([device]);
+
+        return startDevices({}).then(() => {
+          expect(sdk.startServer).to.have.been.calledWith({
+            brain: {
+              host: '10.0.0.2',
+              port: 3001,
+            },
+            port: 6336,
+            name: 'default',
+            devices: [device],
           });
         });
       });
