@@ -1,5 +1,7 @@
 'use strict';
 
+const chalk = require('chalk');
+
 /* eslint no-console: 0 */
 
 module.exports = {
@@ -9,13 +11,13 @@ module.exports = {
 };
 
 function info(...args) {
-  console.info('Info:', ...args);
+  console.info(chalk.cyan.bold('Info:'), ...args);
 }
 
 function warn(...args) {
-  console.warn('Warning:', ...args);
+  console.warn(chalk.yellow.bold('Warning:'), ...args);
 }
 
 function error(...args) {
-  console.error('Error:', ...args);  
+  console.error(chalk.red.bold('Error:'), ...args);  
 }
