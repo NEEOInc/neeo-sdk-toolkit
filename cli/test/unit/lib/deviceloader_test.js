@@ -7,11 +7,12 @@ const mockery = require('mockery');
 
 describe('./lib/deviceloader.js', function() {
   const sandbox = sinon.createSandbox();
-  let deviceLoader, filesystem;
+  let deviceLoader, filesystem, log;
 
   before(function() {
     mockery.enable({ warnOnReplace: true, warnOnUnregistered: false, useCleanCache: true });
 
+    log = require('../../../lib/log');
     filesystem = require('../../../lib/filesystem');
     deviceLoader = require('../../../lib/deviceloader');    
   });
@@ -55,7 +56,7 @@ describe('./lib/deviceloader.js', function() {
       });
 
       it('should load the exposed drivers', function() {
-        sandbox.stub(console, 'warn');
+        sandbox.stub(log, 'warn');
 
         return deviceLoader.loadDevices()
           .then((devices) => {
@@ -63,7 +64,7 @@ describe('./lib/deviceloader.js', function() {
               getMockDriver('neeo-driver-a'),
               getMockDriver('neeo_driver-b'),
             ]);
-            expect(console.warn).to.not.have.been.called;
+            expect(log.warn).to.not.have.been.called;
           });
       });
     });
@@ -97,11 +98,11 @@ describe('./lib/deviceloader.js', function() {
       });
 
       it('should warn when loading drivers the legacy way', function() {
-        sandbox.stub(console, 'warn');
+        sandbox.stub(log, 'warn');
 
         return deviceLoader.loadDevices()
         .then(() => {
-          expect(console.warn).to.have.been.calledTwice;
+          expect(log.warn).to.have.been.calledTwice;
         });
       });
 

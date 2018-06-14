@@ -5,7 +5,7 @@
   "public": true,
   "scripts": {
     "test": "nyc mocha \"test/**/*.js\"",
-    "eslint": "node ./node_modules/eslint/bin/eslint.js index.js lib/*"
+    "eslint": "node ./node_modules/eslint/bin/eslint.js index.js lib/* test/**/*.js"
   },
   "keywords": [
     "NEEO",

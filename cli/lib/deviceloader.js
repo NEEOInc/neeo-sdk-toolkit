@@ -4,6 +4,7 @@ const debug = require('debug')('neeo:cli:DeviceLoader');
 const BluePromise = require('bluebird');
 const path = require('path');
 const filesystem = require('./filesystem');
+const log = require('./log');
 
 const LEGACY_EXPORT_PATH = 'devices';
 const MODULE_NEEO_PREFIXES = [
@@ -63,8 +64,8 @@ function getDriverPath(moduleName) {
     })
     .catch((error) => {
       debug('Driver for %s not available at legacy path: %s', moduleName, error.message);
-      console.error(
-        `Error: No device file found for ${moduleName}, ` +
+      log.error(
+        `No device file found for ${moduleName}, ` +
         'that driver should specify its main file in its package.json'
       );
     });
@@ -92,7 +93,7 @@ function getLegacyPathIfFileExists(moduleName) {
 
   return filesystem.fileExists(legacyPath)
     .then(() => {
-      console.warn(`Warning: loading driver from legacy devices/index.js for ${moduleName}.`);
+      log.warn(`loading driver from legacy devices/index.js for ${moduleName}.`);
       debug('Using legacy path:', legacyPath);
       return legacyPath;
     });
@@ -106,8 +107,8 @@ function loadDrivers(driverPaths) {
         debug('try to load driver from', driverPath);
         return require(driverPath).devices;
       } catch (error) {
-        console.error(
-          `Error: could not load devices in file ${driverPath}: ${error.message}`
+        log.error(
+          `could not load devices in file ${driverPath}: ${error.message}`
         );
       }
     })

@@ -2,6 +2,7 @@
 
 const deviceController = require('./devicecontroller');
 const sdkOptions = require('./sdkoptions');
+const log = require('./log');
 
 module.exports = {
   execute,
@@ -16,6 +17,6 @@ function execute(args) {
       return deviceController.startDevices(options);
   }
 
-  console.warn('Unknown command:', command);
+  log.warn('Unknown command:', command);
   process.exit(1);
 }

@@ -3,6 +3,7 @@
 const BluePromise = require('bluebird');
 const sdk = require('neeo-sdk');
 const deviceLoader = require('./deviceloader');
+const log = require('./log');
 
 let serverConfiguration;
 
@@ -17,7 +18,7 @@ function stopDevices() {
   }
   sdk.stopServer(serverConfiguration)
     .catch((error) => {
-      console.error('ERROR:', error.message);
+      log.error(error.message);
       process.exit(1);
     });
 }
@@ -29,7 +30,7 @@ function startDevices(sdkOptions) {
     ])
     .then((results) => {
       const [devices, brain] = results;
-      console.info('- Start server, connect to NEEO Brain:', {
+      log.info('Start server, connect to NEEO Brain:', {
         brain: brain.name || 'unknown',
         host: brain.host,
       });
@@ -37,10 +38,10 @@ function startDevices(sdkOptions) {
       return sdk.startServer(serverConfiguration);
     })
     .then(() => {
-      console.info('# Your devices are now ready to use in the NEEO app!');
+      log.info('Your devices are now ready to use in the NEEO app!');
     })
     .catch((error) => {
-      console.error('ERROR:', error.message);
+      log.error(error.message);
       process.exit(1);
     });
 }
@@ -88,9 +89,9 @@ function getBrainFrom(sdkOptions) {
 }
 
 function findBrain() {
-  console.info('No Brain address configured, attempting to discover one...');
+  log.info('No Brain address configured, attempting to discover one...');
   return sdk.discoverOneBrain().then((brain) => {
-    console.info('- Brain discovered:', brain.name);
+    log.info('- Brain discovered:', brain.name);
 
     return brain;
   });
