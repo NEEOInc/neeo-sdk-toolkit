@@ -4,16 +4,15 @@ const sinon = require('sinon');
 const chai = require('chai');
 const expect = chai.expect;
 const mockery = require('mockery');
-const fs = require('fs');
 
 describe('./lib/deviceloader.js', function() {
   const sandbox = sinon.createSandbox();
-  let deviceLoader;
+  let deviceLoader, filesystem;
 
   before(function() {
     mockery.enable({ warnOnReplace: true, warnOnUnregistered: false, useCleanCache: true });
-    mockery.registerAllowable('fs');
 
+    filesystem = require('../../../lib/filesystem');
     deviceLoader = require('../../../lib/deviceloader');    
   });
 
@@ -23,7 +22,8 @@ describe('./lib/deviceloader.js', function() {
 
   beforeEach(function() {
     sandbox.stub(process, 'cwd').returns('');
-    sandbox.stub(fs, 'readdirSync').returns([]);
+    sandbox.stub(filesystem, 'readDirectory').resolves([]);
+    sandbox.stub(filesystem, 'readJSONFile').rejects(new Error('Unit Test: File not found'));
   }); 
 
   afterEach(function() {
@@ -32,22 +32,40 @@ describe('./lib/deviceloader.js', function() {
   });
 
   describe('loadDevices', function() {
-    context.skip('neeo-driver modules using standard main & export', function() {
+
+    // TODO tests for neeo-sdk which matches format but doesn't have drivers
+    // TODO test if there's an invalid main but legacy path
+
+    context('neeo-driver modules using standard main & export', function() {
       const DRIVER_MODULE_NAMES = [
         'neeo-driver-a',
         'neeo_driver-b',
       ];
-      // TODO setup mockery to handle the requires...
 
-      it('should return an empty list', function() {
-        fs.readdirSync.returns(DRIVER_MODULE_NAMES);
-        
-        const devices = deviceLoader.loadDevices();
+      beforeEach(function() {
+        filesystem.readDirectory.resolves(DRIVER_MODULE_NAMES);
 
-        expect(devices).to.deep.equal([
-          { name: 'neeo-driver-a'},
-          { name: 'neeo_driver-b'},
-        ]);
+        DRIVER_MODULE_NAMES.forEach((mockDriver) => {
+          filesystem.readJSONFile.withArgs(getPackageJSONPath(mockDriver))
+            .resolves(getMockPackageJSON(mockDriver));
+
+          mockery.registerMock(getMainScriptPath(mockDriver), {
+            devices: [getMockDriver(mockDriver)],
+          });
+        });
+      });
+
+      it('should load the exposed drivers', function() {
+        sandbox.stub(console, 'warn');
+
+        return deviceLoader.loadDevices()
+          .then((devices) => {
+            expect(devices).to.deep.equal([
+              getMockDriver('neeo-driver-a'),
+              getMockDriver('neeo_driver-b'),
+            ]);
+            expect(console.warn).to.not.have.been.called;
+          });
       });
     });
 
@@ -58,12 +76,10 @@ describe('./lib/deviceloader.js', function() {
       ];
 
       beforeEach(function() {
-        sandbox.stub(fs, 'existsSync');
-        fs.readdirSync.returns(LEGACY_DRIVER_MODULE_NAMES);
+        filesystem.readDirectory.resolves(LEGACY_DRIVER_MODULE_NAMES);
+        filesystem.readJSONFile.rejects(new Error('Unit Test: File not found'));
 
         LEGACY_DRIVER_MODULE_NAMES.forEach((mockDriver) => {
-          fs.existsSync.withArgs(getLegacyIndexPath(mockDriver)).returns(true);
-
           mockery.registerMock(getLegacyIndexPath(mockDriver), {
             devices: [getMockDriver(mockDriver)],
           });
@@ -112,7 +128,7 @@ describe('./lib/deviceloader.js', function() {
       ];
 
       it('should return an empty list', function() {
-        fs.readdirSync.returns(NON_DRIVER_MODULE_NAMES);
+        filesystem.readDirectory.resolves(NON_DRIVER_MODULE_NAMES);
 
         return deviceLoader.loadDevices()
           .then((devices) => {
@@ -125,6 +141,21 @@ describe('./lib/deviceloader.js', function() {
 
 function getMockDriver(name) {
   return { name };
+}
+
+
+function getPackageJSONPath(moduleName) {
+  return `node_modules/${moduleName}/package.json`;
+}
+
+function getMockPackageJSON(moduleName) {
+  return {
+    main: `${moduleName}.js`,
+  };
+}
+
+function getMainScriptPath(moduleName) {
+  return `node_modules/${moduleName}/${moduleName}.js`;
 }
 
 function getLegacyIndexPath(moduleName) {
