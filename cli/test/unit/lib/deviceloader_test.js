@@ -24,6 +24,7 @@ describe('./lib/deviceloader.js', function() {
     sandbox.stub(process, 'cwd').returns('');
     sandbox.stub(filesystem, 'readDirectory').resolves([]);
     sandbox.stub(filesystem, 'readJSONFile').rejects(new Error('Unit Test: File not found'));
+    sandbox.stub(filesystem, 'fileExists').rejects(new Error('Unit Test: File not found'));
   }); 
 
   afterEach(function() {
@@ -32,10 +33,6 @@ describe('./lib/deviceloader.js', function() {
   });
 
   describe('loadDevices', function() {
-
-    // TODO tests for neeo-sdk which matches format but doesn't have drivers
-    // TODO test if there's an invalid main but legacy path
-
     context('neeo-driver modules using standard main & export', function() {
       const DRIVER_MODULE_NAMES = [
         'neeo-driver-a',
@@ -48,6 +45,8 @@ describe('./lib/deviceloader.js', function() {
         DRIVER_MODULE_NAMES.forEach((mockDriver) => {
           filesystem.readJSONFile.withArgs(getPackageJSONPath(mockDriver))
             .resolves(getMockPackageJSON(mockDriver));
+          filesystem.fileExists.withArgs(getMainScriptPath(mockDriver))
+            .resolves();
 
           mockery.registerMock(getMainScriptPath(mockDriver), {
             devices: [getMockDriver(mockDriver)],
@@ -77,9 +76,10 @@ describe('./lib/deviceloader.js', function() {
 
       beforeEach(function() {
         filesystem.readDirectory.resolves(LEGACY_DRIVER_MODULE_NAMES);
-        filesystem.readJSONFile.rejects(new Error('Unit Test: File not found'));
 
         LEGACY_DRIVER_MODULE_NAMES.forEach((mockDriver) => {
+          filesystem.fileExists.withArgs(getLegacyIndexPath(mockDriver))
+            .resolves();
           mockery.registerMock(getLegacyIndexPath(mockDriver), {
             devices: [getMockDriver(mockDriver)],
           });
@@ -103,6 +103,19 @@ describe('./lib/deviceloader.js', function() {
         .then(() => {
           expect(console.warn).to.have.been.calledTwice;
         });
+      });
+
+      it('should still load legacy device if main is set but wrong', function() {
+        filesystem.readJSONFile.withArgs(getPackageJSONPath('neeo-driver-legacy-a'))
+          .resolves(getMockPackageJSON('neeo-driver-legacy-a'));
+
+        return deviceLoader.loadDevices()
+          .then((devices) => {  
+            expect(devices).to.deep.equal([
+              getMockDriver('neeo-driver-legacy-a'),
+              getMockDriver('neeo_driver-legacy-b'),
+            ]);
+          });
       });
     });
 
@@ -129,6 +142,18 @@ describe('./lib/deviceloader.js', function() {
 
       it('should return an empty list', function() {
         filesystem.readDirectory.resolves(NON_DRIVER_MODULE_NAMES);
+
+        return deviceLoader.loadDevices()
+          .then((devices) => {
+            expect(devices).to.deep.equal([]);
+          });
+      });
+
+      it('should not load the neeo-sdk as a driver', function() {
+        filesystem.readDirectory.resolves(['neeo-sdk']);
+        filesystem.readJSONFile.withArgs(getPackageJSONPath('neeo-sdk'))
+          .resolves(getMockPackageJSON('neeo-sdk'));
+        mockery.registerMock(getMainScriptPath('neeo-sdk'), {});
 
         return deviceLoader.loadDevices()
           .then((devices) => {

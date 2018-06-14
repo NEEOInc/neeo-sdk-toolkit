@@ -56,6 +56,21 @@ function getValidDriverPaths(moduleNames) {
 }
 
 function getDriverPath(moduleName) {
+  return getStandardPathIfFileExists(moduleName)
+    .catch((error) => {
+      debug('Driver for %s not available at standard path: %s', moduleName, error.message);
+      return getLegacyPathIfFileExists(moduleName);
+    })
+    .catch((error) => {
+      debug('Driver for %s not available at legacy path: %s', moduleName, error.message);
+      console.error(
+        `Error: No device file found for ${moduleName}, ` +
+        'that driver should specify its main file in its package.json'
+      );
+    });
+}
+
+function getStandardPathIfFileExists(moduleName) {
   const basePath = path.join(getPathFromCwdTo('node_modules'), moduleName);
 
   const packagePath = path.join(basePath, 'package.json');
@@ -63,16 +78,21 @@ function getDriverPath(moduleName) {
   return filesystem.readJSONFile(packagePath)
     .then((packageContent) => {
       if (packageContent.main) {
-        // TODO we should check if file exists as well
-        return path.join(basePath, packageContent.main);
+        const driverPath = path.join(basePath, packageContent.main);
+        return filesystem.fileExists(driverPath)
+          .then(() => driverPath);
       }
-      debug('main property missing from package.json');
       throw new Error('package.json missing main script');
-    })
-    .catch(() => {
-      // TODO only warn if file exists
+    });
+}
+
+function getLegacyPathIfFileExists(moduleName) {
+  const basePath = path.join(getPathFromCwdTo('node_modules'), moduleName);
+  const legacyPath = path.join(basePath, LEGACY_EXPORT_PATH, 'index.js');
+
+  return filesystem.fileExists(legacyPath)
+    .then(() => {
       console.warn(`Warning: loading driver from legacy devices/index.js for ${moduleName}.`);
-      const legacyPath = path.join(basePath, LEGACY_EXPORT_PATH, 'index.js');
       debug('Using legacy path:', legacyPath);
       return legacyPath;
     });
@@ -80,13 +100,14 @@ function getDriverPath(moduleName) {
 
 function loadDrivers(driverPaths) {
   return driverPaths
+    .filter((driverPath) => driverPath)
     .map((driverPath) => {
       try {
         debug('try to load driver from', driverPath);
         return require(driverPath).devices;
       } catch (error) {
         console.error(
-          `could not load devices in file ${driverPath}: ${error.message}`
+          `Error: could not load devices in file ${driverPath}: ${error.message}`
         );
       }
     })
