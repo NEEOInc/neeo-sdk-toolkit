@@ -3,6 +3,7 @@
 const BluePromise = require('bluebird');
 const sdk = require('neeo-sdk');
 const deviceLoader = require('./deviceloader');
+const log = require('./log');
 
 let serverConfiguration;
 
@@ -17,7 +18,7 @@ function stopDevices() {
   }
   sdk.stopServer(serverConfiguration)
     .catch((error) => {
-      console.error('ERROR!', error.message);
+      log.error(error.message);
       process.exit(1);
     });
 }
@@ -29,19 +30,18 @@ function startDevices(sdkOptions) {
     ])
     .then((results) => {
       const [devices, brain] = results;
-      console.info('- Start server, connect to NEEO Brain:', {
+      log.info('Start server, connect to NEEO Brain:', {
         brain: brain.name || 'unknown',
         host: brain.host,
-        port: brain.port,
       });
       storeSdkServerConfiguration(brain, sdkOptions, devices);
       return sdk.startServer(serverConfiguration);
     })
     .then(() => {
-      console.info('# Your devices are now ready to use in the NEEO app!');
+      log.info('Your devices are now ready to use in the NEEO app!');
     })
     .catch((error) => {
-      console.error('ERROR!', error);
+      log.error(error.message);
       process.exit(1);
     });
 }
@@ -51,26 +51,24 @@ function storeSdkServerConfiguration(brain, sdkOptions, devices) {
   serverConfiguration = {
     brain,
     port: serverPort || 6336,
-    name: serverName || 'NEEO-SDK-server',
+    name: serverName || 'default',
     devices,
   };
 }
 
 function loadDevices() {
-  return new BluePromise((resolve, reject) => {
-    const devices = deviceLoader.loadDevices();
+  return deviceLoader.loadDevices()
+    .then((devices) => {
+      const noDevicesDefined = devices.length === 0;
 
-    const noDevicesDefined = devices.length === 0;
-
-    if (noDevicesDefined) {
-      return reject(new Error(
-        'No devices found! Make sure you expose devices in the "devices" directory ' +
-        'or install external drivers through npm.'
-      ));
-    }
-
-    resolve(devices);
-  });
+      if (noDevicesDefined) {
+        throw new Error(
+          'No devices found! Make sure you expose devices in the "devices" directory ' +
+          'or install external drivers through npm.'
+        );
+      }
+      return devices;
+    });
 }
 
 function getBrain(sdkOptions) {
@@ -91,9 +89,9 @@ function getBrainFrom(sdkOptions) {
 }
 
 function findBrain() {
-  console.info('No Brain address configured, attempting to discover one...');
+  log.info('No Brain address configured, attempting to discover one...');
   return sdk.discoverOneBrain().then((brain) => {
-    console.info('- Brain discovered:', brain.name);
+    log.info('- Brain discovered:', brain.name);
 
     return brain;
   });
