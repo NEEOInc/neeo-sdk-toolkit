@@ -41,18 +41,20 @@ Drivers can easily be installed from different sources via npm:
 
 ## Configuration and options
 
-The neeo-cli can be configured with several options.
+The neeo-cli can be configured to start the server with different options.
 
-In the package json there is the `neeoSdkOptions` property:
+In the package.json you can use a `neeoSdkOptions` property:
 ```
+  "dependencies": { ... },
+  "devDependencies": { ... },
   "neeoSdkOptions": {
     "serverName": "neeo-sdk-examples-server", // Optional name for the server
-    "serverPort": 6336, // Server port
+    "serverPort": 6336, // Port the server will listen for connections on
     "brainHost": "10.0.0.2", // If set will connect to a specific Brain instead of discovering one
   }
 ```
 
 Environement variable options (these will take precedence over the `neeoSdkOptions` above):
-* `NEEO_SERVER_NAME` – Sets the server name, overrides `neeoSdkOptions.serverName`
-* `NEEO_SERVER_PORT` – Sets the port the server will run on, overrides `neeoSdkOptions.serverPort`
-* `NEEO_HOST_IP` – Sets IP of the NEEO Brain to connect to, overrides `neeoSdkOptions.brainHost`
+* `NEEO_SERVER_NAME` – Sets the server name (overrides `neeoSdkOptions.serverName`)
+* `NEEO_SERVER_PORT` – Sets the port the server will run on (overrides `neeoSdkOptions.serverPort`)
+* `NEEO_HOST_IP` – Sets IP of the NEEO Brain to connect to (overrides `neeoSdkOptions.brainHost`)
