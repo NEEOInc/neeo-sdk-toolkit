@@ -17,6 +17,7 @@ const MODULE_NEEO_PREFIXES = [
 const MODULE_BLACKLIST = [
   'neeo-sdk',
 ];
+const NODE_MODULES_PATH = path.join(process.cwd(), 'node_modules');
 
 module.exports = {
   loadDevices,
@@ -30,13 +31,7 @@ function loadDevices() {
 }
 
 function getModulesList() {
-  const npmDriversPath = getPathFromCwdTo('node_modules');
-
-  return filesystem.readDirectory(npmDriversPath);
-}
-
-function getPathFromCwdTo(directory) {
-  return path.join(process.cwd(), directory);
+  return filesystem.readDirectory(NODE_MODULES_PATH);
 }
 
 function filterByNEEOPrefix(moduleNames) {
@@ -75,7 +70,7 @@ function getDriverPath(moduleName) {
 }
 
 function getStandardPathIfFileExists(moduleName) {
-  const basePath = path.join(getPathFromCwdTo('node_modules'), moduleName);
+  const basePath = path.join(NODE_MODULES_PATH, moduleName);
 
   const packagePath = path.join(basePath, 'package.json');
 
@@ -91,7 +86,7 @@ function getStandardPathIfFileExists(moduleName) {
 }
 
 function getLegacyPathIfFileExists(moduleName) {
-  const basePath = path.join(getPathFromCwdTo('node_modules'), moduleName);
+  const basePath = path.join(NODE_MODULES_PATH, moduleName);
   const legacyPath = path.join(basePath, LEGACY_EXPORT_PATH, 'index.js');
 
   return filesystem.fileExists(legacyPath)

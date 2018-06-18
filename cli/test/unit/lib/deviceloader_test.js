@@ -1,9 +1,12 @@
 'use strict';
 
+const path = require('path');
 const sinon = require('sinon');
 const chai = require('chai');
 const expect = chai.expect;
 const mockery = require('mockery');
+
+const NODE_MODULES_PATH = path.join(process.cwd(), 'node_modules');
 
 describe('./lib/deviceloader.js', function() {
   const sandbox = sinon.createSandbox();
@@ -22,7 +25,6 @@ describe('./lib/deviceloader.js', function() {
   });
 
   beforeEach(function() {
-    sandbox.stub(process, 'cwd').returns('');
     sandbox.stub(filesystem, 'readDirectory').resolves([]);
     sandbox.stub(filesystem, 'readJSONFile').rejects(new Error('Unit Test: File not found'));
     sandbox.stub(filesystem, 'fileExists').rejects(new Error('Unit Test: File not found'));
@@ -171,7 +173,7 @@ function getMockDriver(name) {
 
 
 function getPackageJSONPath(moduleName) {
-  return `node_modules/${moduleName}/package.json`;
+  return `${NODE_MODULES_PATH}/${moduleName}/package.json`;
 }
 
 function getMockPackageJSON(moduleName) {
@@ -181,9 +183,9 @@ function getMockPackageJSON(moduleName) {
 }
 
 function getMainScriptPath(moduleName) {
-  return `node_modules/${moduleName}/${moduleName}.js`;
+  return `${NODE_MODULES_PATH}/${moduleName}/${moduleName}.js`;
 }
 
 function getLegacyIndexPath(moduleName) {
-  return `node_modules/${moduleName}/devices/index.js`;
+  return `${NODE_MODULES_PATH}/${moduleName}/devices/index.js`;
 }
