@@ -8,6 +8,9 @@ const log = require('./log');
 
 const LEGACY_EXPORT_PATH = 'devices';
 const MODULE_NEEO_PREFIXES = [
+  // Recommended prefix:
+  'neeo-driver-',
+  // Legacy prefixes (not recommended):
   'neeo-',
   'neeo_',
 ];

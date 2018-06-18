@@ -35,9 +35,18 @@ Drivers can easily be installed from different sources via npm:
   * `npm install --save ${driverName}`
 * Drivers hosted on Github (for example: `${githubURL}`):
   * `npm install --save git+${githubURL}`
-* Drivers availabe locally (relative to current path for example `../myCustomDriver`):
-  * `npm install ../myCustomDriver`
+* Drivers availabe locally (relative to current path for example `../neeo-driver-custom-device`):
+  * `npm install ../neeo-driver-custom-device`
 * For more options see [npm install documentation](https://docs.npmjs.com/cli/install)
+
+The NEEO CLI will automatically load installed drivers it finds in the `node_modules` folder. Currently NEEO Drivers are detected by prefix (recomendation `neeo-driver-`):
+
+For example:
+* `neeo-driver-example`
+* `neeo-driver-device-example`
+* `neeo-driver-custom-example`
+
+For backwards compatibility reasons drivers prefixed with `neeo-` or `neeo_` are still loaded, but we recommend new drivers to use `neeo-driver-` as a prefix.
 
 ## Configuration and options
 
