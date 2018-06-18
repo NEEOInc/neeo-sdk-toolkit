@@ -41,6 +41,43 @@ describe('./lib/deviceloader.js', function() {
         'neeo-driver-a',
         'neeo_driver-b',
       ];
+      let mockDevices;
+
+      beforeEach(function() {
+        filesystem.readDirectory.resolves(DRIVER_MODULE_NAMES);
+        mockDevices = DRIVER_MODULE_NAMES.map((driverName) => {
+          return getMockDriverDevice(driverName);
+        });
+
+        DRIVER_MODULE_NAMES.forEach((mockDriver, driverIndex) => {
+          filesystem.readJSONFile.withArgs(getPackageJSONPath(mockDriver))
+            .resolves(getMockPackageJSON(mockDriver));
+          filesystem.fileExists.withArgs(getMainScriptPath(mockDriver))
+            .resolves();
+
+            mockery.registerMock(getMainScriptPath(mockDriver), {
+              devices: [mockDevices[driverIndex]],
+            });
+        });
+      });
+
+      it('should load the exposed drivers', function() {
+        sandbox.stub(log, 'warn');
+
+        return deviceLoader.loadDevices()
+          .then((devices) => {
+            expect(devices).to.deep.equal(mockDevices);
+            expect(log.warn).to.not.have.been.called;
+          });
+      });
+    });
+
+    context('neeo-driver modules with invalid devices', function() {
+      const DRIVER_MODULE_NAMES = [
+        'neeo-driver-invalid-a',
+        'neeo-driver-invalid-b',
+      ];
+      let nestedArrayDriver, invalidDeviceDriver;
 
       beforeEach(function() {
         filesystem.readDirectory.resolves(DRIVER_MODULE_NAMES);
@@ -50,23 +87,27 @@ describe('./lib/deviceloader.js', function() {
             .resolves(getMockPackageJSON(mockDriver));
           filesystem.fileExists.withArgs(getMainScriptPath(mockDriver))
             .resolves();
-
-          mockery.registerMock(getMainScriptPath(mockDriver), {
-            devices: [getMockDriver(mockDriver)],
-          });
         });
+
+        nestedArrayDriver = {
+          devices: [[getMockDriverDevice('neeo-driver-a')]],
+        };
+
+        invalidDeviceDriver = {
+          devices: [{ name: 'invalid-driver-no-build-function...' }],
+        };
+
+        mockery.registerMock(getMainScriptPath('neeo-driver-invalid-a'), nestedArrayDriver);
+        mockery.registerMock(getMainScriptPath('neeo-driver-invalid-b'), invalidDeviceDriver);
       });
 
-      it('should load the exposed drivers', function() {
-        sandbox.stub(log, 'warn');
+      it('should skip invalid drivers and log errors', function() {
+        sandbox.spy(log, 'error');
 
         return deviceLoader.loadDevices()
           .then((devices) => {
-            expect(devices).to.deep.equal([
-              getMockDriver('neeo-driver-a'),
-              getMockDriver('neeo_driver-b'),
-            ]);
-            expect(log.warn).to.not.have.been.called;
+            expect(devices).to.deep.equal([]);
+            expect(log.error).to.have.been.calledTwice;
           });
       });
     });
@@ -76,15 +117,20 @@ describe('./lib/deviceloader.js', function() {
         'neeo-driver-legacy-a',
         'neeo_driver-legacy-b',
       ];
+      let mockDevices;
 
       beforeEach(function() {
         filesystem.readDirectory.resolves(LEGACY_DRIVER_MODULE_NAMES);
+        mockDevices = LEGACY_DRIVER_MODULE_NAMES.map((driverName) => {
+          return getMockDriverDevice(driverName);
+        });
 
-        LEGACY_DRIVER_MODULE_NAMES.forEach((mockDriver) => {
+        LEGACY_DRIVER_MODULE_NAMES.forEach((mockDriver, driverIndex) => {
           filesystem.fileExists.withArgs(getLegacyIndexPath(mockDriver))
             .resolves();
+
           mockery.registerMock(getLegacyIndexPath(mockDriver), {
-            devices: [getMockDriver(mockDriver)],
+            devices: [mockDevices[driverIndex]],
           });
         });
       });
@@ -92,10 +138,7 @@ describe('./lib/deviceloader.js', function() {
       it('should load legacy drivers', function() {
         return deviceLoader.loadDevices()
           .then((devices) => {  
-            expect(devices).to.deep.equal([
-              getMockDriver('neeo-driver-legacy-a'),
-              getMockDriver('neeo_driver-legacy-b'),
-            ]);
+            expect(devices).to.deep.equal(mockDevices);
           });
       });
 
@@ -114,10 +157,7 @@ describe('./lib/deviceloader.js', function() {
 
         return deviceLoader.loadDevices()
           .then((devices) => {  
-            expect(devices).to.deep.equal([
-              getMockDriver('neeo-driver-legacy-a'),
-              getMockDriver('neeo_driver-legacy-b'),
-            ]);
+            expect(devices).to.deep.equal(mockDevices);
           });
       });
     });
@@ -167,8 +207,11 @@ describe('./lib/deviceloader.js', function() {
   });
 });
 
-function getMockDriver(name) {
-  return { name };
+function getMockDriverDevice(name) {
+  return {
+    name,
+    build: sinon.stub(),
+  };
 }
 
 

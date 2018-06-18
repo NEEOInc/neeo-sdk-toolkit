@@ -100,16 +100,43 @@ function getLegacyPathIfFileExists(moduleName) {
 function loadDrivers(driverPaths) {
   return driverPaths
     .filter((driverPath) => driverPath)
-    .map((driverPath) => {
-      try {
-        debug('try to load driver from', driverPath);
-        return require(driverPath).devices;
-      } catch (error) {
-        log.error(
-          `could not load devices in file ${driverPath}: ${error.message}`
-        );
-      }
-    })
-    .reduce((acc, val) => acc.concat(val), [])
+    .map(loadDriver)
+    .reduce(flattenDevices, [])
     .filter((device) => device);
+}
+
+function loadDriver(driverPath) {
+  let devices = [];
+  try {
+    debug('try to load driver from', driverPath);
+    devices = require(driverPath).devices;
+  } catch (error) {
+    log.error(`could not load devices in file ${driverPath}: ${error.message}`);
+  }
+
+  const validDevices = devices.reduce((validatedDevices, device) => {
+    if (Array.isArray(device)) {
+      log.error(
+        `invalid device in driver at ${driverPath}: device cannot be an array:`,
+        JSON.stringify(device)
+      );
+    }
+    else if (typeof device.build !== 'function') {
+      log.error(
+        `invalid device in driver at ${driverPath}: device.build() not a function:`,
+        JSON.stringify(device)
+      );
+    }
+    else {
+      validatedDevices = validatedDevices.concat(device);
+    }
+
+    return validatedDevices;
+  }, []);
+
+  return validDevices;
+}
+
+function flattenDevices(devices, driverDevices) {
+  return devices.concat(driverDevices);
 }
