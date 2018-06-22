@@ -1,5 +1,7 @@
 {
   "name": "neeo-sdk-toolkit",
   "version": "0.0.0",
-  "author": "NEEO Inc"
+  "author": "NEEO Inc",
+  "license": "MIT",
+  "private": true
 }
