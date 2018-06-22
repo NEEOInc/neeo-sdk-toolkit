@@ -55,6 +55,10 @@
     ]
   },
   "main": "lib/index.js",
+  "files": [
+    "lib/**",
+    "index.js"
+  ],
   "directories": {
     "lib": "lib",
     "test": "test"
