@@ -5,10 +5,14 @@
 .metadata
 .idea
 .project
-.nyc_output
+
 .vscode
 
 # npm
 npm-debug.log
 node_modules
 npm-debug.*
+
+# Tests
+coverage
+.nyc_output

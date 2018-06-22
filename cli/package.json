@@ -1,0 +1,60 @@
+{
+  "name": "@neeo/cli",
+  "version": "0.0.0",
+  "description": "NEEO SDK CLI",
+  "public": true,
+  "scripts": {
+    "test": "nyc mocha \"test/**/*.js\"",
+    "eslint": "node ./node_modules/eslint/bin/eslint.js index.js lib/* test/**/*.js"
+  },
+  "keywords": [
+    "NEEO",
+    "Brain",
+    "NEEO",
+    "Remote"
+  ],
+  "author": "NEEO Inc",
+  "license": "MIT",
+  "bin": {
+    "neeo-cli": "./index.js"
+  },
+  "dependencies": {
+    "bluebird": "^3.5.1",
+    "debug": "^3.1.0",
+    "neeo-sdk": "^0.50.5",
+    "yargs": "^11.0.0"
+  },
+  "engines": {
+    "node": ">=6.0.0"
+  },
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "chalk": "^2.4.1",
+    "eslint": "^4.19.1",
+    "mocha": "^5.1.1",
+    "mockery": "^2.1.0",
+    "nyc": "^12.0.2",
+    "sinon": "^5.1.0",
+    "sinon-chai": "^3.1.0"
+  },
+  "nyc": {
+    "check-coverage": true,
+    "statements": 90,
+    "branches": 90,
+    "functions": 90,
+    "lines": 90,
+    "include": [
+      "lib/**/*.js"
+    ],
+    "all": true,
+    "reporter": [
+      "text-summary",
+      "lcov"
+    ]
+  },
+  "main": "lib/index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  }
+}
