@@ -1,31 +1,33 @@
 {
   "name": "@neeo/cli",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "NEEO SDK CLI",
   "bugs": "https://github.com/NEEOInc/neeo-sdk-toolkit/issues",
   "repository": "https://github.com/NEEOInc/neeo-sdk-toolkit/tree/master/cli",
   "public": true,
   "scripts": {
+    "start": "node ./neeo-cli.js",
     "test": "nyc mocha \"test/**/*.js\"",
-    "eslint": "node ./node_modules/eslint/bin/eslint.js index.js lib/* test/**/*.js"
+    "eslint": "eslint index.js lib/* test/**/*.js"
   },
   "keywords": [
     "NEEO",
     "Brain",
-    "NEEO",
-    "Remote"
+    "Remote",
+    "IoT",
+    "SDK"
   ],
-  "author": "NEEO Inc",
+  "author": "NEEO Inc.",
   "license": "MIT",
   "bin": {
-    "neeo-cli": "./index.js"
+    "neeo-cli": "./neeo-cli.js"
   },
   "dependencies": {
     "bluebird": "^3.5.1",
     "chalk": "^2.4.1",
+    "commander": "^2.16.0",
     "debug": "^3.1.0",
-    "neeo-sdk": "^0.50.5",
-    "yargs": "^11.0.0"
+    "neeo-sdk": "*"
   },
   "engines": {
     "node": ">=6.0.0"

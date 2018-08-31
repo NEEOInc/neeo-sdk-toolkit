@@ -18,7 +18,7 @@ function load() {
   return Object.assign(
     {},
     getPackageJSONOptions(),
-    getEnvironmentOptions(),
+    getEnvironmentOptions()
   );
 }
 

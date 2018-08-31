@@ -112,6 +112,7 @@ function loadDriver(driverPath) {
     devices = require(driverPath).devices;
   } catch (error) {
     log.error(`could not load devices in file ${driverPath}: ${error.message}`);
+    log.error('DRIVER LOAD FAILED STACKTRACE:\n', error.stack);
   }
 
   const validDevices = devices.reduce((validatedDevices, device) => {

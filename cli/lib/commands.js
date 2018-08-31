@@ -4,8 +4,11 @@ const deviceController = require('./devicecontroller');
 const sdkOptions = require('./sdkoptions');
 const log = require('./log');
 
+const COMMAND_START = 'start';
+
 module.exports = {
   execute,
+  COMMAND_START,
 };
 
 function execute(args) {
@@ -13,7 +16,7 @@ function execute(args) {
   const options = sdkOptions.load();
 
   switch (command) {
-    case 'start':
+    case COMMAND_START:
       return deviceController.startDevices(options);
   }
 
