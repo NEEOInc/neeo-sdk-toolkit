@@ -1,6 +1,6 @@
 {
   "name": "@neeo/cli",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "NEEO SDK CLI",
   "bugs": "https://github.com/NEEOInc/neeo-sdk-toolkit/issues",
   "repository": "https://github.com/NEEOInc/neeo-sdk-toolkit/tree/master/cli",
@@ -59,7 +59,7 @@
   "main": "lib/index.js",
   "files": [
     "lib/**",
-    "index.js"
+    "neeo-cli.js"
   ],
   "directories": {
     "lib": "lib",
