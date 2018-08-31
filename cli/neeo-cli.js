@@ -18,4 +18,4 @@ if (!cliParser.start) {
   process.exit(1);
 }
 
-commands.execute(commands.COMMAND_START);
+commands.execute([ commands.COMMAND_START ]);
