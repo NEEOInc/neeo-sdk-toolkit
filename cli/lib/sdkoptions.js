@@ -1,6 +1,6 @@
 'use strict';
 
-const debug = require('debug')('neeo:cli:options');
+const debug = require('debug')('neeo:cli:sdkoptions');
 const fs = require('fs');
 
 const ENV_MAPPING = {

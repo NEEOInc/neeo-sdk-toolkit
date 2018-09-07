@@ -19,9 +19,16 @@ To start the server with the driver:
 npx neeo-cli start
 ```
 
-## Installing the CLI Globally:
+NOTE: if you use Node 6 `npx` is not available, you can start the cli using this command:
+```
+node_modules/.bin/neeo-cli start
+```
 
-Globally: `npm install -g @neeo/cli`
+The CLI tool will automatically scan the `node_modules` directory to find NEEO Drivers.
+
+## Debug
+
+Run `DEBUG="neeo:cli*" npx neeo-cli start` to see debug messages.
 
 ## Using the CLI to run drivers:
 
@@ -39,7 +46,7 @@ Drivers can easily be installed from different sources via npm:
   * `npm install ../neeo-driver-custom-device`
 * For more options see [npm install documentation](https://docs.npmjs.com/cli/install)
 
-The NEEO CLI will automatically load installed drivers it finds in the `node_modules` folder. Currently NEEO Drivers are detected by prefix (recomendation `neeo-driver-`):
+The NEEO CLI will automatically load installed drivers it finds in the `node_modules` folder. Currently NEEO Drivers are detected by prefix (recommendation `neeo-driver-`):
 
 For example:
 * `neeo-driver-example`

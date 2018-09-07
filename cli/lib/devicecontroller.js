@@ -1,6 +1,7 @@
 'use strict';
 
 const BluePromise = require('bluebird');
+const debug = require('debug')('neeo:cli:DeviceController');
 const sdk = require('neeo-sdk');
 const deviceLoader = require('./deviceloader');
 const log = require('./log');
@@ -59,6 +60,10 @@ function storeSdkServerConfiguration(brain, sdkOptions, devices) {
 function loadDevices() {
   return deviceLoader.loadDevices()
     .then((devices) => {
+      debug('Found devices:');
+      devices.forEach((device) => {
+        debug(' - ', device.manufacturer, device.devicename);
+      });
       const noDevicesDefined = devices.length === 0;
 
       if (noDevicesDefined) {

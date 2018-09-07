@@ -91,7 +91,7 @@ function getLegacyPathIfFileExists(moduleName) {
 
   return filesystem.fileExists(legacyPath)
     .then(() => {
-      log.warn(`loading driver from legacy devices/index.js for ${moduleName}.`);
+      log.warn(`loading driver from legacy devices/index.js for ${moduleName}. Please check if an updated driver is available.`);
       debug('Using legacy path:', legacyPath);
       return legacyPath;
     });
