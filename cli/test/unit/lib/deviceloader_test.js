@@ -265,5 +265,5 @@ function getMainScriptPath(moduleName) {
 }
 
 function getLegacyIndexPath(moduleName) {
-  return path.join(NODE_MODULES_PATH,moduleName, 'devices/index.js');
+  return path.join(NODE_MODULES_PATH,moduleName, 'devices','index.js');
 }

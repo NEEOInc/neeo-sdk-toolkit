@@ -104,7 +104,7 @@ function loadDrivers(driverPaths) {
   
   return BluePromise
     .all( drivers )
-    .then( driver => driver
+    .then( (driver) => driver
       .reduce(flattenDevices, [])
       .filter((device) => device) );
 }
@@ -119,25 +119,25 @@ function loadDriver(driverPath) {
     log.error('DRIVER LOAD FAILED STACKTRACE:\n', error.stack);
   }
   if( !devices ) {
-    log.error("devices is undefined.");
+    log.error('devices is undefined.');
     return;
   }
 
   if (Array.isArray(devices)) {
-    return devices;
+    return loadValidDevices(devices);
   }
   // Devices is "Thenable" 
   if( devices.then ) {
-    debug("loading async devices.");
+    debug('loading async devices.');
 
-    return devices.catch( log.error ).then( loadValidDevices )
+    return devices.catch( log.error ).then( loadValidDevices );
   }
 
-  log.error("unsupported devices type.");
+  log.error('unsupported devices type.');
 
-  function loadValidDevices( devices ){
-    debug(`found ${devices.length} devices at ${driverPath}`)
-    const validDevices = devices.reduce((validatedDevices, device) => {
+  function loadValidDevices( d ){
+    debug(`found ${d.length} devices at ${driverPath}`);
+    return d.reduce((validatedDevices, device) => {
       if (Array.isArray(device)) {
         log.error(
           `invalid device in driver at ${driverPath}: device cannot be an array:`,
@@ -156,8 +156,6 @@ function loadDriver(driverPath) {
 
       return validatedDevices;
     }, []);
-
-    return validDevices;
   }
 }
 
