@@ -98,15 +98,19 @@ function getLegacyPathIfFileExists(moduleName) {
 }
 
 function loadDrivers(driverPaths) {
-  return driverPaths
+  const drivers = driverPaths
     .filter((driverPath) => driverPath)
-    .map(loadDriver)
-    .reduce(flattenDevices, [])
-    .filter((device) => device);
+    .map(loadDriver);
+  
+  return BluePromise
+    .all( drivers )
+    .then( driver => driver
+      .reduce(flattenDevices, [])
+      .filter((device) => device) );
 }
 
 function loadDriver(driverPath) {
-  let devices = [];
+  let devices ;
   try {
     debug('try to load driver from', driverPath);
     devices = require(driverPath).devices;
@@ -114,29 +118,49 @@ function loadDriver(driverPath) {
     log.error(`could not load devices in file ${driverPath}: ${error.message}`);
     log.error('DRIVER LOAD FAILED STACKTRACE:\n', error.stack);
   }
+  if( !devices ) {
+    log.error("devices is undefined.");
+    return;
+  }
 
-  const validDevices = devices.reduce((validatedDevices, device) => {
-    if (Array.isArray(device)) {
-      log.error(
-        `invalid device in driver at ${driverPath}: device cannot be an array:`,
-        JSON.stringify(device)
-      );
-    }
-    else if (typeof device.build !== 'function') {
-      log.error(
-        `invalid device in driver at ${driverPath}: device.build() not a function:`,
-        JSON.stringify(device)
-      );
-    }
-    else {
-      validatedDevices = validatedDevices.concat(device);
-    }
+  if (Array.isArray(devices)) {
+    return BluePromise.promisify( loadValidDevices( devices ) );
+  }
+  // Devices is "Thenable" 
+  if( devices.then ) {
+    debug("loading async devices.");
 
-    return validatedDevices;
-  }, []);
+    return devices.catch( log.error ).then( loadValidDevices )
+  }
 
-  return validDevices;
+  log.error("unsupported devices type.");
+
+  function loadValidDevices( devices ){
+    log.info(`found ${devices.length} devices at ${driverPath}`)
+    const validDevices = devices.reduce((validatedDevices, device) => {
+      if (Array.isArray(device)) {
+        log.error(
+          `invalid device in driver at ${driverPath}: device cannot be an array:`,
+          JSON.stringify(device)
+        );
+      }
+      else if (typeof device.build !== 'function') {
+        log.error(
+          `invalid device in driver at ${driverPath}: device.build() not a function:`,
+          JSON.stringify(device)
+        );
+      }
+      else {
+        validatedDevices = validatedDevices.concat(device);
+      }
+
+      return validatedDevices;
+    }, []);
+
+    return validDevices;
+  }
 }
+
 
 function flattenDevices(devices, driverDevices) {
   return devices.concat(driverDevices);
