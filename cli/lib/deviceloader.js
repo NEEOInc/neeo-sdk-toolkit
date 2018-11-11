@@ -136,7 +136,7 @@ function loadDriver(driverPath) {
   log.error("unsupported devices type.");
 
   function loadValidDevices( devices ){
-    log.info(`found ${devices.length} devices at ${driverPath}`)
+    debug(`found ${devices.length} devices at ${driverPath}`)
     const validDevices = devices.reduce((validatedDevices, device) => {
       if (Array.isArray(device)) {
         log.error(
