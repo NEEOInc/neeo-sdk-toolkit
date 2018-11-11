@@ -5,6 +5,7 @@ const sinon = require('sinon');
 const chai = require('chai');
 const expect = chai.expect;
 const mockery = require('mockery');
+chai.use(require('sinon-chai'));
 
 const NODE_MODULES_PATH = path.join(process.cwd(), 'node_modules');
 
@@ -216,7 +217,7 @@ function getMockDriverDevice(name) {
 
 
 function getPackageJSONPath(moduleName) {
-  return `${NODE_MODULES_PATH}/${moduleName}/package.json`;
+  return path.join(NODE_MODULES_PATH,moduleName, 'package.json');
 }
 
 function getMockPackageJSON(moduleName) {
@@ -226,9 +227,9 @@ function getMockPackageJSON(moduleName) {
 }
 
 function getMainScriptPath(moduleName) {
-  return `${NODE_MODULES_PATH}/${moduleName}/${moduleName}.js`;
+  return path.join(NODE_MODULES_PATH,moduleName,`${moduleName}.js`);
 }
 
 function getLegacyIndexPath(moduleName) {
-  return `${NODE_MODULES_PATH}/${moduleName}/devices/index.js`;
+  return path.join(NODE_MODULES_PATH,moduleName, 'devices/index.js');
 }
