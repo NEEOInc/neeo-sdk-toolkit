@@ -204,6 +204,40 @@ describe('./lib/deviceloader.js', function() {
           });
       });
     });
+
+    context('neeo drivers with devices promises', function(){
+      const DRIVER_MODULE_NAMES = [
+        'neeo-driver-a',
+        'neeo_driver-b',
+      ];
+      let mockDevices;
+
+      beforeEach(function() {
+        filesystem.readDirectory.resolves(DRIVER_MODULE_NAMES);
+        mockDevices = DRIVER_MODULE_NAMES.map((driverName) => {
+          return getMockDriverDevice(driverName);
+        });
+
+        DRIVER_MODULE_NAMES.forEach((mockDriver, driverIndex) => {
+          filesystem.readJSONFile.withArgs(getPackageJSONPath(mockDriver))
+            .resolves(getMockPackageJSON(mockDriver));
+          filesystem.fileExists.withArgs(getMainScriptPath(mockDriver))
+            .resolves();
+
+            mockery.registerMock(getMainScriptPath(mockDriver), {
+              devices: Promise.resolve( [mockDevices[driverIndex]] ),
+            });
+        });
+      });
+      it('should load devices when promises resolves', function(){
+        sandbox.stub(log, 'warn');
+         return deviceLoader.loadDevices()
+          .then((devices) => {
+            expect(devices).to.deep.equal(mockDevices);
+            expect(log.warn).to.not.have.been.called;
+          });
+      });
+    });
   });
 });
 

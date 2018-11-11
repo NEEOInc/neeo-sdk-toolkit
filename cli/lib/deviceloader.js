@@ -124,7 +124,7 @@ function loadDriver(driverPath) {
   }
 
   if (Array.isArray(devices)) {
-    return BluePromise.promisify( loadValidDevices( devices ) );
+    return devices;
   }
   // Devices is "Thenable" 
   if( devices.then ) {
