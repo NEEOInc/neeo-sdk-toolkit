@@ -1,4 +1,4 @@
-# neeo-cli
+# neeo-cli [![Build Status](https://travis-ci.org/NEEOInc/neeo-sdk-toolkit.svg?branch=master)](https://travis-ci.org/NEEOInc/neeo-sdk-toolkit)
 
 The NEEO CLI helps with running and developing NEEO SDK drivers.
 
