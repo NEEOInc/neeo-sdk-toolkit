@@ -8,6 +8,6 @@ os:
   - linux
   - osx
 script:
-- cd cli && npm install && npm test
+- cd cli && npm install && npm install neeo-sdk && npm test
 
 
