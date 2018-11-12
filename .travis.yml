@@ -1,0 +1,13 @@
+language: node_js
+node_js:
+  - "6"
+  - "8"
+  - "10"
+os:
+  - windows
+  - linux
+  - osx
+script:
+- cd cli && npm install && npm test
+
+
