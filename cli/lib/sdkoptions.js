@@ -6,6 +6,8 @@ const fs = require('fs');
 const ENV_MAPPING = {
   serverName: 'NEEO_SERVER_NAME',
   serverPort: 'NEEO_SERVER_PORT',
+  serverIp: 'NEEO_SERVER_IP',
+  serverBaseURL: 'NEEO_SERVER_BASEURL',
   brainHost: 'NEEO_HOST_IP',
   brainPort: 'NEEO_HOST_PORT',
 };
