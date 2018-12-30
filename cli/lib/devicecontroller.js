@@ -48,11 +48,13 @@ function startDevices(sdkOptions) {
 }
 
 function storeSdkServerConfiguration(brain, sdkOptions, devices) {
-  const { serverPort, serverName } = sdkOptions;
+  const { serverPort, serverName, serverIp, serverBaseURL } = sdkOptions;
   serverConfiguration = {
     brain,
     port: serverPort || 6336,
     name: serverName || 'default',
+    adapterIpAddress: serverIp,
+    baseurl: serverBaseURL,
     devices,
   };
 }

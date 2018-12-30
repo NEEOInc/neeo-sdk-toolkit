@@ -17,7 +17,7 @@ describe('./lib/devicecontroller.js', function() {
     sandbox.stub(sdk, 'stopServer').resolves();
     sandbox.stub(sdk, 'startServer').resolves();
     sandbox.stub(deviceLoader, 'loadDevices').resolves([]);
-  }); 
+  });
 
   afterEach(function() {
     sandbox.restore();
@@ -77,6 +77,8 @@ describe('./lib/devicecontroller.js', function() {
             },
             port: 6336,
             name: 'default',
+            adapterIpAddress: undefined,
+            baseurl: undefined,
             devices: [device],
           });
         });
@@ -98,6 +100,8 @@ describe('./lib/devicecontroller.js', function() {
             },
             port: 6336,
             name: 'default',
+            adapterIpAddress: undefined,
+            baseurl: undefined,
             devices: [device],
           });
         });
